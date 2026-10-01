@@ -81,7 +81,7 @@ def test_get_company_success(mock_get):
     assert company.organization_number == ORG_NUMBER
     assert company.name == "Example Company AS"
     assert company.organization_form == "AS"
-    assert company.status == "True"
+    assert company.vat_registered is True
     assert company.registration_date == "2010-01-15"
     assert company.business_address == "Example Street 10"
     assert company.postal_code == "0123"
