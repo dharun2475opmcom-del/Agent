@@ -28,7 +28,7 @@ class BRREGFactExtractor:
         values = {
             "name": company.name,
             "organization_form": company.organization_form,
-            "vat_registered": company.status,
+            "vat_registered": company.vat_registered,
             "registration_date": company.registration_date,
             "business_address": company.business_address,
             "postal_code": company.postal_code,
