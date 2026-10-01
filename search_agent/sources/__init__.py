@@ -7,6 +7,16 @@ from .brreg import (
     BRREGNotFoundError,
     CompanyRecord,
 )
+from .html import (
+    HTMLExtractionError,
+    HTMLTextExtractor,
+)
+from .web import (
+    WebFetchError,
+    WebFetcher,
+    WebFetchNotFoundError,
+    WebPage,
+)
 
 __all__ = [
     "BRREGClient",
@@ -14,4 +24,10 @@ __all__ = [
     "BRREGIdentityMismatchError",
     "BRREGNotFoundError",
     "CompanyRecord",
+    "HTMLExtractionError",
+    "HTMLTextExtractor",
+    "WebFetchError",
+    "WebFetcher",
+    "WebFetchNotFoundError",
+    "WebPage",
 ]

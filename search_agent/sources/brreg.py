@@ -32,7 +32,7 @@ class CompanyRecord:
     organization_number: str
     name: str
     organization_form: str | None
-    status: str | None
+    vat_registered: bool | None
     registration_date: str | None
     business_address: str | None
     postal_code: str | None
@@ -96,7 +96,9 @@ class BRREGClient:
                 f"BRREG returned invalid JSON for organization {org_number}."
             ) from exc
 
-        returned_org_number = str(data.get("organisasjonsnummer", "")).strip()
+        returned_org_number = str(
+            data.get("organisasjonsnummer", "")
+        ).strip()
 
         if returned_org_number != org_number:
             raise BRREGIdentityMismatchError(
@@ -116,6 +118,7 @@ class BRREGClient:
         business_address = data.get("forretningsadresse") or {}
 
         address_lines = business_address.get("adresse") or []
+
         address = ", ".join(
             str(line).strip()
             for line in address_lines
@@ -131,28 +134,57 @@ class BRREGClient:
 
         industry = data.get("naeringskode1") or {}
 
+        website = data.get("hjemmeside")
+
+        if website:
+            website = (
+                str(website)
+                .strip()
+                .replace("\\", "")
+            )
+
         return CompanyRecord(
             organization_number=organization_number,
             name=str(data.get("navn", "")).strip(),
             organization_form=(
-                str(data["organisasjonsform"].get("kode")).strip()
+                str(
+                    data["organisasjonsform"].get("kode")
+                ).strip()
                 if data.get("organisasjonsform")
                 else None
             ),
-            status=(
-                str(data.get("registrertIMvaRegisteret")).strip()
+            vat_registered=(
+                bool(data.get("registrertIMvaRegisteret"))
                 if data.get("registrertIMvaRegisteret") is not None
                 else None
             ),
             registration_date=(
-                str(data.get("registreringsdatoEnhetsregisteret")).strip()
-                if data.get("registreringsdatoEnhetsregisteret")
+                str(
+                    data.get(
+                        "registreringsdatoEnhetsregisteret"
+                    )
+                ).strip()
+                if data.get(
+                    "registreringsdatoEnhetsregisteret"
+                )
                 else None
             ),
             business_address=address or None,
-            postal_code=str(postal_code).strip() if postal_code else None,
-            postal_place=str(postal_place).strip() if postal_place else None,
-            municipality=str(municipality).strip() if municipality else None,
+            postal_code=(
+                str(postal_code).strip()
+                if postal_code
+                else None
+            ),
+            postal_place=(
+                str(postal_place).strip()
+                if postal_place
+                else None
+            ),
+            municipality=(
+                str(municipality).strip()
+                if municipality
+                else None
+            ),
             industry_code=(
                 str(industry.get("kode")).strip()
                 if industry.get("kode")
@@ -163,10 +195,6 @@ class BRREGClient:
                 if industry.get("beskrivelse")
                 else None
             ),
-            website=(
-                str(data.get("hjemmeside")).strip()
-                if data.get("hjemmeside")
-                else None
-            ),
+            website=website or None,
             raw_data=data,
         )

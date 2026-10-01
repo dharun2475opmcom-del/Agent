@@ -1,5 +1,10 @@
-"""Evidence models and utilities."""
+"""Evidence models and freshness utilities."""
 
+from .freshness import EvidenceChange, FreshnessChecker
 from .models import Evidence
 
-__all__ = ["Evidence"]
+__all__ = [
+    "Evidence",
+    "EvidenceChange",
+    "FreshnessChecker",
+]
