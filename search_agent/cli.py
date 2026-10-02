@@ -47,6 +47,7 @@ def run(argv: list[str] | None = None) -> int:
 
         result = researcher.research(
             args.organization_number,
+            max_results_per_query=args.max_results,
         )
 
         payload = result.profile.to_dict()
