@@ -8,7 +8,7 @@ import sys
 
 from search_agent.agent import CompanyResearcher
 from search_agent.search import CompanySearchEngine, MockSearchProvider
-from search_agent.sources import BRREGClient
+from search_agent.sources import BRREGClient, BRREGRoleClient
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -43,6 +43,7 @@ def run(argv: list[str] | None = None) -> int:
         researcher = CompanyResearcher(
             brreg_client=BRREGClient(),
             search_engine=search_engine,
+            roles_client=BRREGRoleClient(),
         )
 
         result = researcher.research(
