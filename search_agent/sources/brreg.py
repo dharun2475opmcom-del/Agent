@@ -51,6 +51,11 @@ class CompanyRecord:
     purpose: str | None = None
     capital_amount: float | None = None
     capital_currency: str | None = None
+    bankrupt: bool | None = None
+    under_liquidation: bool | None = None
+    under_forced_liquidation: bool | None = None
+    registered_in_business_register: bool | None = None
+    latest_annual_accounts_year: int | None = None
     raw_data: dict[str, Any] | None = None
 
 
@@ -240,6 +245,36 @@ class BRREGClient:
                 str(capital.get("valuta")).strip()
                 if capital.get("valuta")
                 else None
+            ),
+            bankrupt=(
+                bool(data.get("konkurs"))
+                if data.get("konkurs") is not None
+                else None
+            ),
+            under_liquidation=(
+                bool(data.get("underAvvikling"))
+                if data.get("underAvvikling") is not None
+                else None
+            ),
+            under_forced_liquidation=(
+                bool(data.get("underTvangsavviklingEllerTvangsopplosning"))
+                if data.get("underTvangsavviklingEllerTvangsopplosning") is not None
+                else None
+            ),
+            registered_in_business_register=(
+                bool(data.get("registrertIForetaksregisteret"))
+                if data.get("registrertIForetaksregisteret") is not None
+                else None
+            ),
+            latest_annual_accounts_year=(
+                max(
+                    (
+                        int(year)
+                        for year in (data.get("sisteInnsendteAarsregnskap") or [])
+                        if str(year).isdigit()
+                    ),
+                    default=None,
+                )
             ),
             raw_data=data,
         )
