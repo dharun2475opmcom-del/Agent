@@ -98,8 +98,13 @@ class CompanyResearcher:
     def research(
         self,
         organization_number: str,
+        *,
+        max_results_per_query: int = 10,
     ) -> ResearchResult:
         """Research one company by organization number."""
+
+        if max_results_per_query < 1:
+            raise ValueError("max_results_per_query must be at least 1.")
 
         # ---------------------------------------------------------
         # 1. Resolve the company through the official registry.
@@ -120,7 +125,8 @@ class CompanyResearcher:
         # 3. Search for additional public web information.
         # ---------------------------------------------------------
         search_execution = self.search_engine.search(
-            context
+            context,
+            max_results_per_query=max_results_per_query,
         )
 
         # ---------------------------------------------------------
