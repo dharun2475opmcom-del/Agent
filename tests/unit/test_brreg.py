@@ -39,6 +39,14 @@ def make_brreg_response(
             "beskrivelse": "Programmeringstjenester",
         },
         "hjemmeside": "https://example.no",
+        "epostadresse": "hello@example.no",
+        "telefon": "22000000",
+        "mobil": "90000000",
+        "antallAnsatte": 12,
+        "harRegistrertAntallAnsatte": True,
+        "stiftelsesdato": "2009-12-01",
+        "vedtektsfestetFormaal": "Software development.",
+        "kapital": {"belop": 30000, "valuta": "NOK"},
     }
 
 
@@ -90,6 +98,15 @@ def test_get_company_success(mock_get):
     assert company.industry_code == "62.010"
     assert company.industry_description == "Programmeringstjenester"
     assert company.website == "https://example.no"
+    assert company.email == "hello@example.no"
+    assert company.phone == "22000000"
+    assert company.mobile == "90000000"
+    assert company.employee_count == 12
+    assert company.employee_count_registered is True
+    assert company.foundation_date == "2009-12-01"
+    assert company.purpose == "Software development."
+    assert company.capital_amount == 30000.0
+    assert company.capital_currency == "NOK"
 
     mock_get.assert_called_once()
 
@@ -190,3 +207,44 @@ def test_invalid_organization_number_is_rejected_before_request():
             client.get_company("123456789")
 
         mock_get.assert_not_called()
+
+@patch("search_agent.sources.brreg.requests.get")
+def test_get_roles_success(mock_get):
+    """Public BRREG roles should be normalized without birth data."""
+
+    mock_get.return_value = mock_response(
+        json_data={
+            "rollegrupper": [
+                {
+                    "type": {"kode": "STYR", "beskrivelse": "Styrets leder"},
+                    "roller": [
+                        {
+                            "type": {"kode": "LEDE", "beskrivelse": "Styrets leder"},
+                            "person": {"navn": {"fornavn": "Ada", "mellomnavn": "", "etternavn": "Nordmann"}},
+                            "avregistrert": False,
+                        },
+                        {
+                            "type": {"kode": "REVI", "beskrivelse": "Revisor"},
+                            "enhet": {"organisasjonsnummer": "123456789", "navn": ["Audit", "AS"]},
+                            "avregistrert": True,
+                        },
+                    ],
+                }
+            ]
+        }
+    )
+
+    from search_agent.sources.brreg import BRREGRoleClient
+
+    roles = BRREGRoleClient().get_roles(ORG_NUMBER)
+
+    assert len(roles) == 2
+    assert roles[0].role_code == "LEDE"
+    assert roles[0].person_name == "Ada Nordmann"
+    assert roles[0].organization_number is None
+    assert roles[1].organization_number == "123456789"
+    assert roles[1].organization_name == "Audit AS"
+    assert roles[1].deregistered is True
+
+    requested_url = mock_get.call_args.args[0]
+    assert requested_url.endswith("/" + ORG_NUMBER + "/roller")
