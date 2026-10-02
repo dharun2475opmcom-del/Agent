@@ -5,7 +5,9 @@ from .brreg import (
     BRREGError,
     BRREGIdentityMismatchError,
     BRREGNotFoundError,
+    BRREGRoleClient,
     CompanyRecord,
+    CompanyRole,
 )
 from .html import (
     HTMLExtractionError,
@@ -23,7 +25,9 @@ __all__ = [
     "BRREGError",
     "BRREGIdentityMismatchError",
     "BRREGNotFoundError",
+    "BRREGRoleClient",
     "CompanyRecord",
+    "CompanyRole",
     "HTMLExtractionError",
     "HTMLTextExtractor",
     "WebFetchError",
