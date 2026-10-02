@@ -7,7 +7,7 @@ import json
 import sys
 
 from search_agent.agent import CompanyResearcher
-from search_agent.search import BraveSearchProvider, CompanySearchEngine
+from search_agent.search import CompanySearchEngine, MockSearchProvider
 from search_agent.sources import BRREGClient
 
 
@@ -36,7 +36,7 @@ def run(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     try:
-        provider = BraveSearchProvider()
+        provider = MockSearchProvider()
         search_engine = CompanySearchEngine(
             provider=provider,
         )
