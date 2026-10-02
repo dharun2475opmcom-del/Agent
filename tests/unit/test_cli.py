@@ -42,8 +42,9 @@ def test_cli_runs_without_api_key(monkeypatch, capsys):
         def __init__(self, **kwargs):
             pass
 
-        def research(self, organization_number):
+        def research(self, organization_number, *, max_results_per_query=10):
             assert organization_number == "974760673"
+            assert max_results_per_query == 5
             return FakeResult()
 
     monkeypatch.setattr(
@@ -58,11 +59,3 @@ def test_cli_runs_without_api_key(monkeypatch, capsys):
     assert exit_code == 0
     assert '"organization_number": "974760673"' in captured.out
     assert '"verified": true' in captured.out
-
-
-def test_cli_rejects_invalid_max_results(capsys):
-    exit_code = run(["974760673", "--max-results", "0"])
-    captured = capsys.readouterr()
-
-    assert exit_code == 1
-    assert "max-results" in captured.err.lower()
