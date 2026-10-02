@@ -25,6 +25,7 @@ from search_agent.search import (
 )
 from search_agent.sources import (
     BRREGClient,
+    BRREGRoleClient,
     CompanyRecord,
     HTMLTextExtractor,
     WebFetchError,
@@ -57,9 +58,11 @@ class CompanyResearcher:
         web_fetcher: WebFetcher | None = None,
         html_extractor: HTMLTextExtractor | None = None,
         website_researcher: OfficialWebsiteResearcher | None = None,
+        roles_client: BRREGRoleClient | None = None,
     ) -> None:
         self.brreg_client = brreg_client
         self.search_engine = search_engine
+        self.roles_client = roles_client
 
         self.fact_extractor = (
             fact_extractor or BRREGFactExtractor()
@@ -174,7 +177,30 @@ class CompanyResearcher:
         )
 
         # ---------------------------------------------------------
-        # 7. Inspect additional accepted search results.
+        # 7. Enrich the profile with public BRREG role data.
+        # ---------------------------------------------------------
+        if self.roles_client is not None:
+            try:
+                roles = self.roles_client.get_roles(
+                    company.organization_number
+                )
+            except Exception:
+                roles = []
+
+            role_facts = self.fact_extractor.extract_roles(
+                company.organization_number,
+                roles,
+                source_url=(
+                    "https://data.brreg.no/enhetsregisteret/api/"
+                    f"enheter/{company.organization_number}/roller"
+                ),
+            )
+
+            for fact in role_facts:
+                profile.add_fact(fact)
+
+        # ---------------------------------------------------------
+        # 8. Inspect additional accepted search results.
         # ---------------------------------------------------------
         for matched_result in matched_results:
             if not matched_result.accepted:
@@ -195,7 +221,7 @@ class CompanyResearcher:
                 continue
 
             # -----------------------------------------------------
-            # 8. Verify page identity before extracting facts.
+            # 9. Verify page identity before extracting facts.
             # -----------------------------------------------------
             if not self.web_identity_matcher.matches(
                 page_text,
@@ -204,7 +230,7 @@ class CompanyResearcher:
                 continue
 
             # -----------------------------------------------------
-            # 9. Extract evidence-backed web facts.
+            # 10. Extract evidence-backed web facts.
             # -----------------------------------------------------
             web_facts = self.web_fact_extractor.extract(
                 organization_number=company.organization_number,
@@ -217,7 +243,7 @@ class CompanyResearcher:
             )
 
             # -----------------------------------------------------
-            # 10. Add web facts using freshness rules.
+            # 11. Add web facts using freshness rules.
             # -----------------------------------------------------
             for fact in web_facts:
                 profile.add_fact(fact)
