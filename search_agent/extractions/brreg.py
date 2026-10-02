@@ -46,6 +46,11 @@ class BRREGFactExtractor:
             "purpose": company.purpose,
             "capital_amount": company.capital_amount,
             "capital_currency": company.capital_currency,
+            "bankrupt": company.bankrupt,
+            "under_liquidation": company.under_liquidation,
+            "under_forced_liquidation": company.under_forced_liquidation,
+            "registered_in_business_register": company.registered_in_business_register,
+            "latest_annual_accounts_year": company.latest_annual_accounts_year,
         }
 
         return self._facts_from_values(
